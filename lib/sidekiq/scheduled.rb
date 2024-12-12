@@ -93,12 +93,18 @@ module Sidekiq
 
       def start
         @thread ||= safe_thread("scheduler") {
+puts "** Scheduler - starting"
           initial_wait
 
+puts "** Scheduler - finished initial wait, entering loop..."
           until @done
+puts "** Scheduler - enqueueing jobs"
             enqueue
+puts "** Scheduler - waiting"
             wait
+puts "** Scheduler - done waiting, looping again"
           end
+puts "** Scheduler - exiting"
           logger.info("Scheduler exiting...")
         }
       end
@@ -115,10 +121,14 @@ module Sidekiq
       private
 
       def wait
+puts "** Scheduler - about to wait"
         @sleeper.pop(random_poll_interval)
+puts "** Scheduler - finished wait"
       rescue Timeout::Error
+puts "** Scheduler - got Timeout::Error error"
         # expected
       rescue => ex
+puts "** Scheduler - got an error while waiting: #{ex.inspect}"
         # if poll_interval_average hasn't been calculated yet, we can
         # raise an error trying to reach Redis.
         logger.error ex.message
