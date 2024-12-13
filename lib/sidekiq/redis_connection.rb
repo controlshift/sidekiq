@@ -30,6 +30,7 @@ module Sidekiq
         #     config.redis = { url: "...", timeout: 1 }
         symbolized_options[:timeout] ||= 3
 
+puts "-x-x-x-x-x RedisConnection.create - creating new connection with options: #{symbolized_options.inspect}.\nBacktrace: #{caller.join("\n")}"
         redis_config = Sidekiq::RedisClientAdapter.new(symbolized_options)
         ConnectionPool.new(timeout: pool_timeout, size: size, name: pool_name) do
           redis_config.new_client

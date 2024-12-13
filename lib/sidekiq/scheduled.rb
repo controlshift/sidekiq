@@ -61,7 +61,14 @@ puts "xxxxxx Enq#zpopbyscore - Loading LUA script"
         end
 
 puts "xxxxxx Enq#zpopbyscore - Calling ZPOPBYSCORE LUA script"
-        conn.call("EVALSHA", @lua_zpopbyscore_sha, keys.size, *keys, *argv)
+        res = conn.call("EVALSHA", @lua_zpopbyscore_sha, keys.size, *keys, *argv)
+        another_res = Sidekiq.redis {|conn| conn.zrange('schedule', '-inf', Time.now.to_f.to_s, "byscore", "limit", 0, 1)}
+puts "xxxxxx Enq#zpopbyscore - ZPOPBYSCORE returned: #{res}"
+puts "xxxxxx Enq#zpopbyscore - Calling zrange directly returned: #{another_res}"
+redis_conn = Sidekiq.redis {|conn| conn.inspect}
+puts "xxxxxx Enq#zpopbyscore - Redis connection: #{redis_conn}}"
+
+        res
       rescue RedisClient::CommandError => e
 puts "xxxxxx Enq#zpopbyscore - Error running redis command: #{e.inspect}"
         raise unless e.message.start_with?("NOSCRIPT")

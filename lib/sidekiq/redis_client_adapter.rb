@@ -61,7 +61,9 @@ module Sidekiq
     end
 
     def initialize(options)
+puts "!!!!!!! RedisClientAdapter#initialize - options argument: #{options.inspect}"
       opts = client_opts(options)
+puts "!!!!!!! RedisClientAdapter#initialize - creating redis client with options: #{opts.inspect}"
       @config = if opts.key?(:sentinels)
         RedisClient.sentinel(**opts)
       elsif opts.key?(:nodes)

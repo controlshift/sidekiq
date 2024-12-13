@@ -28,6 +28,7 @@ module Sidekiq
       @managers = config.capsules.values.map do |cap|
         Sidekiq::Manager.new(cap)
       end
+puts "ooooooo Launcher#initialize - creating Poller with config #{@config.inspect}"
       @poller = Sidekiq::Scheduled::Poller.new(@config)
       @done = false
     end

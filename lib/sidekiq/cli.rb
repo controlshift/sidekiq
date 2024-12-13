@@ -24,11 +24,15 @@ module Sidekiq # :nodoc:
     attr_accessor :config
 
     def parse(args = ARGV.dup)
+puts "##### CLI#parse - Parsing options. Initial configuration: #{@config&.inspect}"
+puts "##### CLI#parse - Parsing options. Default configuration: #{Sidekiq.default_configuration.inspect}"
+
       @config ||= Sidekiq.default_configuration
 
       setup_options(args)
       initialize_logger
       validate!
+puts "##### CLI#parse - Parsed options: #{@config.inspect}"
     end
 
     def jruby?
@@ -118,6 +122,7 @@ module Sidekiq # :nodoc:
         logger.info "Starting processing, hit Ctrl-C to stop"
       end
 
+puts "##### CLI#launch - Starting Sidekiq::Launcher with config: #{@config.inspect}"
       @launcher = Sidekiq::Launcher.new(@config)
 
       begin
