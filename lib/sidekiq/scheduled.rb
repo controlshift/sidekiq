@@ -35,8 +35,13 @@ module Sidekiq
             # We need to go through the list one at a time to reduce the risk of something
             # going wrong between the time jobs are popped from the scheduled queue and when
             # they are pushed onto a work queue and losing the jobs.
+puts "xxxxxx Enq#enqueue_jobs - Enqueueing jobs from #{sorted_set}"
+
             while !@done && (job = zpopbyscore(conn, keys: [sorted_set], argv: [Time.now.to_f.to_s]))
+puts "xxxxxx Enq#enqueue_jobs - Found job to enqueue: #{job}"
+
               @client.push(Sidekiq.load_json(job))
+puts "xxxxxx Enq#enqueue_jobs - enqueued #{sorted_set}: #{job}"
               logger.debug { "enqueued #{sorted_set}: #{job}" }
             end
           end
@@ -51,11 +56,14 @@ module Sidekiq
 
       def zpopbyscore(conn, keys: nil, argv: nil)
         if @lua_zpopbyscore_sha.nil?
+puts "xxxxxx Enq#zpopbyscore - Loading LUA script"
           @lua_zpopbyscore_sha = conn.script(:load, LUA_ZPOPBYSCORE)
         end
 
+puts "xxxxxx Enq#zpopbyscore - Calling ZPOPBYSCORE LUA script"
         conn.call("EVALSHA", @lua_zpopbyscore_sha, keys.size, *keys, *argv)
       rescue RedisClient::CommandError => e
+puts "xxxxxx Enq#zpopbyscore - Error running redis command: #{e.inspect}"
         raise unless e.message.start_with?("NOSCRIPT")
 
         @lua_zpopbyscore_sha = nil
